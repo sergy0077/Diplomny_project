@@ -1,4 +1,4 @@
-from tortoise import Tortoise, fields
+from tortoise import Tortoise, fields, run_async
 from tortoise.models import Model
 
 
@@ -9,7 +9,7 @@ class YourModel(Model):
 
 TORTOISE_ORM = {
     "connections": {
-        "default": "postgres://sergy007:11223344@localhost:5432/diplom",
+        "default": "postgres://sergy007:130468@localhost:5432/diplom",
     },
     "apps": {
         "models": {
@@ -31,3 +31,5 @@ async def init():
 
 async def close():
     await Tortoise.close_connections()
+
+run_async(init())

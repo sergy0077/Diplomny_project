@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 
 api_router = APIRouter(default_response_class=JSONResponse)
 
-# api_router = APIRouter()
 
 '''
 определяет APIRouter и включает маршруты из других модулей
