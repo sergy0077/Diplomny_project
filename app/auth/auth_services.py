@@ -2,16 +2,20 @@ from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from starlette import status
 from app.app_models import User
 from app.auth.auth_models import Token
 from settings import SECRET_KEY
+from passlib.context import CryptContext
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
-        status_code=401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
@@ -29,14 +33,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
-async def authenticate_user(username: str, password: str):
-    user = await User.get_or_none(email=username)
-    if user and user.verify_password(password):
-        return user
-    return None
+async def authenticate_user(current_user: User = Depends(get_current_user)):
+    return current_user
 
 
-async def create_access_token(data: dict, expires_delta: timedelta):
+async def create_access_token(data: dict, expires_delta=timedelta(minutes=15)):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})

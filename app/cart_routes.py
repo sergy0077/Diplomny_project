@@ -1,22 +1,32 @@
 from fastapi import APIRouter, Depends
-from app.app_services import CartService, Product
+from app.app_services import CartService
+from app.cart import Product as AppProduct
+from pydantic import BaseModel
 
 router = APIRouter()
 cart_service = CartService()
 
 
-@router.post("/add-to-cart/{product_name}")
-async def add_to_cart(product_name: str, cart_service: CartService = Depends()):
-    product = Product(name=product_name, price=10.0)
+class AddToCart(BaseModel):
+    product_name: str
+
+
+@router.post("/add-to-cart")
+async def add_to_cart(product_data: AddToCart, cart_service: CartService = Depends()):
+    product = AppProduct(name=product_data.product_name, price=10.0)
     cart_service.add_product_to_cart(product)
-    return {"message": f"{product_name} добавлен в корзину"}
+    return {"message": f"{product_data.product_name} добавлен в корзину"}
 
 
-@router.post("/remove-from-cart/{product_name}")
-async def remove_from_cart(product_name: str, cart_service: CartService = Depends()):
-    product = Product(name=product_name, price=10.0)
+class RemoveFromCart(BaseModel):
+    product_name: str
+
+
+@router.post("/remove-from-cart")
+async def remove_from_cart(product_data: RemoveFromCart, cart_service: CartService = Depends()):
+    product = AppProduct(name=product_data.product_name, price=10.0)
     cart_service.remove_product_from_cart(product)
-    return {"message": f"{product_name} удален из корзины"}
+    return {"message": f"{product_data.product_name} удален из корзины"}
 
 
 @router.post("/clear-cart")
